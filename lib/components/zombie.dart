@@ -2,9 +2,9 @@ import 'package:flame/flame.dart';
 import 'package:flame/components.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame/geometry.dart';
-import 'character.dart';
+import 'package:goldrush/components/character_enemy.dart';
 
-class Zombie extends Character {
+class Zombie extends EnemyCharacter {
   Zombie(
       {required Vector2 position, required Vector2 size, required double speed})
       : super(position: position, size: size, speed: speed);

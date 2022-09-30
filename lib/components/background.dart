@@ -1,9 +1,16 @@
 import 'package:flame/components.dart';
+import 'package:flame/input.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/palette.dart';
 import 'dart:ui';
 
-class Background extends PositionComponent {
+import 'package:goldrush/components/george.dart';
+
+class Background extends PositionComponent with Tappable {
+  //constructor Background
+  Background(this.george);
+  final George george;
+
   static final backgroundPaint = BasicPalette.magenta.paint();
   late double screenWidth, screenHeight;
   @override
@@ -20,5 +27,11 @@ class Background extends PositionComponent {
     super.render(canvas);
     canvas.drawRect(
         Rect.fromPoints(position.toOffset(), size.toOffset()), backgroundPaint);
+  }
+
+  @override
+  bool onTapeUp(TapUpInfo info) {
+    george.moveToLocation(info);
+    return true;
   }
 }
