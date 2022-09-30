@@ -1,6 +1,6 @@
 # goldrush
 
-A new Flutter project.
+A new Flutter Game.
 
 ## Getting Started
 
