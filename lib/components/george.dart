@@ -4,10 +4,14 @@ import 'package:flame/geometry.dart';
 import 'package:flame/input.dart';
 import 'package:flame/sprite.dart';
 import 'package:goldrush/components/Hud/hud.dart';
+import 'package:goldrush/components/coin.dart';
 import 'package:goldrush/components/skeleton.dart';
+import 'package:goldrush/components/water.dart';
 import 'package:goldrush/components/zombie.dart';
 import 'package:goldrush/components/character.dart';
 import 'package:goldrush/utils/math_utils.dart';
+import 'package:flame_audio/flame_audio.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class George extends Character {
   George(
@@ -19,9 +23,13 @@ class George extends Character {
 
   late Vector2 targetLocation;
   bool movingToTouchedLocation = false;
+  bool isMoving = false;
+  late AudioPlayer audioPlayerRunning;
 
   late double walkingSpeed, runningSpeed;
   final HudComponents hud;
+  int collisionDirection = Character.down;
+  bool hasCollided = false;
 
   //
   @override
@@ -45,6 +53,8 @@ class George extends Character {
     playing = false;
     anchor = Anchor.center;
     addHitbox(HitboxRectangle());
+    await FlameAudio.audioCache.loadAll(
+        ['sounds/enemy_dies.wav', 'sounds/running.wav', 'sounds/coin.wav']);
   }
 
   void moveToLocation(TapUpInfo info) {
@@ -60,15 +70,37 @@ class George extends Character {
       other.removeFromParent();
       hud.scoreText.setScore(10);
     }
+    FlameAudio.play('sounds/enemy_dies.wav', volume: 1.0);
+    if (other is Coin) {
+      other.removeFromParent();
+      hud.scoreText.setScore(20);
+      FlameAudio.play('sounds/coin.wav', volume: 1.0);
+    }
+    if (other is Water) {
+      if (!hasCollided) {
+        if (movingToTouchedLocation) {
+          movingToTouchedLocation = false;
+        } else {
+          hasCollided = true;
+          collisionDirection = currentDirection;
+        }
+      }
+    }
   }
 
   @override
-  void update(double dt) {
+  Future<void> update(double dt) async {
     super.update(dt);
     speed = hud.runBotton.buttonPressed ? runningSpeed : walkingSpeed;
     if (!hud.joystick.relativeDelta.isZero()) {
       position.add(hud.joystick.relativeDelta * speed * dt);
       playing = true;
+      movingToTouchedLocation = false;
+      if (isMoving) {
+        isMoving = true;
+        audioPlayerRunning =
+            await FlameAudio.loopLongAudio('sounds/running.wav', volume: 1.0);
+      }
 
       switch (hud.joystick.direction) {
         case JoystickDirection.up:
@@ -101,6 +133,8 @@ class George extends Character {
       var diffrence = targetLocation - position;
       if (diffrence.x.abs() < threshold && diffrence.y.abs() < threshold) {
         stopAnimations();
+        audioPlayerRunning.stop();
+        isMoving = false;
         movingToTouchedLocation = false;
         return;
       }
@@ -124,11 +158,28 @@ class George extends Character {
       if (playing) {
         stopAnimations();
       }
+      if (isMoving) {
+        isMoving = false;
+        audioPlayerRunning.stop();
+      }
     }
   }
 
   void stopAnimations() {
     animation?.currentIndex = 0;
     playing = false;
+  }
+
+  @override
+  void onPaused() {
+    if (isMoving) {
+      audioPlayerRunning.pause();
+    }
+    @override
+    void onResumed() async {
+      if (isMoving) {
+        audioPlayerRunning.resume();
+      }
+    }
   }
 }

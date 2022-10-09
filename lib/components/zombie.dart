@@ -22,6 +22,7 @@ class Zombie extends EnemyCharacter {
     rightAnimation =
         spriteSheet.createAnimation(row: 2, stepTime: 0.2, from: 0, to: 2);
     changeDirection();
-    addHitbox(HitboxRectangle());
+    addHitbox(HitboxRectangle(relation: Vector2(1.0, 0.7)));
+    // relativeOffset = Vector2(0.0, 0.3);
   }
 }
