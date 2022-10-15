@@ -31,7 +31,7 @@ class Background extends PositionComponent with Tappable {
   // }
 
   @override
-  bool onTapeUp(TapUpInfo info) {
+  bool onTapUp(TapUpInfo info) {
     george.moveToLocation(info);
     return true;
   }

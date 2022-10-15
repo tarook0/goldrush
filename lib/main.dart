@@ -19,7 +19,7 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   await Flame.device.fullScreen();
-  await Flame.device.setPortrait();
+  await Flame.device.setLandscape();
   runApp(GameWidget(game: goldRush));
 }
 
@@ -28,7 +28,7 @@ class GoldRush extends FlameGame
   @override
   Future<void> onLoad() async {
     super.onLoad();
-    debugMode = true;
+    // debugMode = true;
     FlameAudio.bgm.initialize();
     await FlameAudio.bgm.load('music/music.mp3');
     await FlameAudio.bgm.play('music/music.mp3', volume: 0.1);
@@ -38,10 +38,14 @@ class GoldRush extends FlameGame
         size: Vector2(48.8, 48.0),
         speed: 90.0,
         hud: hud);
+
     add(george);
     add(Background(george));
     final tiledMap = await TiledComponent.load('tiles.tmx', Vector2.all(32));
     add(tiledMap);
+
+    add(hud);
+
     final enemies = tiledMap.tileMap.getObjectGroupFromLayer('Enemies');
     enemies.objects.asMap().forEach((index, position) {
       if (index % 2 == 0) {
@@ -56,14 +60,7 @@ class GoldRush extends FlameGame
             speed: 20.0));
       }
     });
-    // add(Zombie(
-    //     position: Vector2(100, 200), size: Vector2(32.0, 64.0), speed: 20.0));
-    // add(Zombie(
-    //     position: Vector2(300, 200), size: Vector2(32.0, 64.0), speed: 20.0));
-    // add(Skeleton(
-    //     position: Vector2(100, 600), size: Vector2(32.0, 64.0), speed: 60.0));
-    // add(Skeleton(
-    //     position: Vector2(300, 600), size: Vector2(32.0, 64.0), speed: 60.0));
+
     Random random = Random(DateTime.now().microsecondsSinceEpoch);
     for (int i = 0; i < 50; i++) {
       int randomX = random.nextInt(48) + 1;
@@ -81,7 +78,7 @@ class GoldRush extends FlameGame
           size: Vector2(rect.width, rect.height),
           id: rect.id));
     });
-    add(hud);
+
     camera.speed = 1;
     camera.followComponent(george,
         worldBounds: Rect.fromLTWH(0, 0, 1600, 1600));
@@ -112,10 +109,7 @@ class GoldRush extends FlameGame
         });
         break;
       case AppLifecycleState.inactive:
-        // TODO: Handle this case.
-        break;
       case AppLifecycleState.detached:
-        // TODO: Handle this case.
         break;
     }
   }

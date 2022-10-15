@@ -89,11 +89,43 @@ class George extends Character {
   }
 
   @override
+  void onCollisionEnd(Collidable other) {
+    hasCollided = false;
+  }
+
+  void movePlayer(double delta) {
+    if (!(hasCollided && collisionDirection == currentDirection)) {
+      if (movingToTouchedLocation) {
+        position
+            .add((targetLocation - position).normalized() * (speed * delta));
+      } else {
+        switch (currentDirection) {
+          case Character.left:
+            position.add(Vector2(delta * (-speed), 0));
+            break;
+          case Character.right:
+            position.add(Vector2(delta * (speed), 0));
+            break;
+
+          case Character.down:
+            position.add(Vector2(0, delta * (speed)));
+            break;
+
+          case Character.up:
+            position.add(Vector2(0, delta * (-speed)));
+            break;
+        }
+      }
+    }
+  }
+
+  @override
   Future<void> update(double dt) async {
     super.update(dt);
     speed = hud.runBotton.buttonPressed ? runningSpeed : walkingSpeed;
     if (!hud.joystick.relativeDelta.isZero()) {
-      position.add(hud.joystick.relativeDelta * speed * dt);
+      movePlayer(dt);
+      //position.add(hud.joystick.relativeDelta * speed * dt);
       playing = true;
       movingToTouchedLocation = false;
       if (isMoving) {
@@ -128,7 +160,8 @@ class George extends Character {
           break;
       }
     } else if (movingToTouchedLocation) {
-      position += (targetLocation - position).normalized() * (speed * dt);
+      movePlayer(dt);
+      //position += (targetLocation - position).normalized() * (speed * dt);
       double threshold = 1.0;
       var diffrence = targetLocation - position;
       if (diffrence.x.abs() < threshold && diffrence.y.abs() < threshold) {
